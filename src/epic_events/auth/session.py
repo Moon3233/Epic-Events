@@ -9,11 +9,6 @@ from epic_events.auth.permissions import Permission, has_permission
 from epic_events.auth.session_store import clear_token, load_token, save_token
 from epic_events.auth.tokens import TokenError, create_access_token, decode_access_token
 from epic_events.models.employee import Employee
-from epic_events.services.employees import (
-    EmployeeIdentity,
-    identify_employee,
-    to_identity,
-)
 
 
 class AuthenticationError(Exception):
@@ -24,8 +19,10 @@ class AuthorizationError(Exception):
     """L'utilisateur authentifié n'a pas la permission requise."""
 
 
-def login(session: Session, *, email: str, password: str) -> EmployeeIdentity:
+def login(session: Session, *, email: str, password: str):
     """Authentifie, émet un JWT et le stocke localement."""
+    from epic_events.services.employees import identify_employee
+
     identity = identify_employee(session, email=email, password=password)
     if identity is None:
         raise AuthenticationError("Email ou mot de passe incorrect.")
@@ -74,14 +71,14 @@ def get_current_employee(session: Session) -> Employee:
     )
     if employee is None:
         clear_token()
-        raise AuthenticationError(
-            "Compte introuvable. Reconnectez-vous."
-        )
+        raise AuthenticationError("Compte introuvable. Reconnectez-vous.")
     return employee
 
 
-def get_current_identity(session: Session) -> EmployeeIdentity:
+def get_current_identity(session: Session):
     """Retourne l'identité (avec permissions) de la session courante."""
+    from epic_events.services.employees import to_identity
+
     return to_identity(get_current_employee(session))
 
 
@@ -91,6 +88,21 @@ def require_permission(session: Session, permission: Permission) -> Employee:
     if not has_permission(employee, permission):
         raise AuthorizationError(
             f"Permission refusée : {permission.value} "
+            f"(département « {employee.department.name} »)."
+        )
+    return employee
+
+
+def require_any_permission(
+    session: Session,
+    *permissions: Permission,
+) -> Employee:
+    """Autorise si l'employé possède au moins une des permissions listées."""
+    employee = get_current_employee(session)
+    if not any(has_permission(employee, permission) for permission in permissions):
+        names = ", ".join(permission.value for permission in permissions)
+        raise AuthorizationError(
+            f"Permission refusée (requis : {names}) "
             f"(département « {employee.department.name} »)."
         )
     return employee

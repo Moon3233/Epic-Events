@@ -57,6 +57,7 @@ DEPARTMENT_PERMISSIONS: dict[str, frozenset[Permission]] = {
             Permission.UPDATE_ANY_CONTRACT,
             Permission.UPDATE_ANY_EVENT,
             Permission.FILTER_EVENTS_WITHOUT_SUPPORT,
+            Permission.FILTER_CONTRACTS,
         }
     ),
     "commercial": _READ_ALL
