@@ -77,3 +77,9 @@ def get_jwt_settings() -> JwtSettings:
         algorithm=os.getenv("JWT_ALGORITHM", "HS256"),
         expire_hours=int(os.getenv("JWT_EXPIRE_HOURS", "8")),
     )
+
+
+def get_sentry_dsn() -> str | None:
+    """DSN Sentry optionnel (None = journalisation désactivée)."""
+    dsn = os.getenv("SENTRY_DSN", "").strip()
+    return dsn or None

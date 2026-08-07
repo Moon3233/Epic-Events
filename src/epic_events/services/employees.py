@@ -127,8 +127,10 @@ def create_collaborator(
     department_name: str,
 ) -> EmployeeIdentity:
     """Crée un collaborateur (réservé à la gestion)."""
-    require_permission(session, Permission.MANAGE_EMPLOYEES)
-    return create_employee(
+    from epic_events.logging_sentry import log_event
+
+    actor = require_permission(session, Permission.MANAGE_EMPLOYEES)
+    identity = create_employee(
         session,
         employee_number=employee_number,
         full_name=full_name,
@@ -136,6 +138,14 @@ def create_collaborator(
         password=password,
         department_name=department_name,
     )
+    log_event(
+        "Collaborateur créé",
+        actor_id=actor.id,
+        employee_id=identity.id,
+        email=identity.email,
+        department=identity.department,
+    )
+    return identity
 
 
 def list_employees(session: Session) -> list[Employee]:
@@ -222,7 +232,17 @@ def update_collaborator(
         )
 
     session.flush()
-    return to_identity(employee)
+    identity = to_identity(employee)
+    from epic_events.logging_sentry import log_event
+
+    log_event(
+        "Collaborateur modifié",
+        actor_id=actor.id,
+        employee_id=identity.id,
+        email=identity.email,
+        department=identity.department,
+    )
+    return identity
 
 
 def delete_collaborator(session: Session, employee_id: int) -> None:

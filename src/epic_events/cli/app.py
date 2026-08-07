@@ -10,12 +10,14 @@ from epic_events.cli.clients_commands import clients_group
 from epic_events.cli.contracts_commands import contracts_group
 from epic_events.cli.employees_commands import employees_group
 from epic_events.cli.events_commands import events_group
+from epic_events.logging_sentry import init_sentry
 
 
 @click.group()
 @click.version_option(version=__version__, prog_name="epicevents")
 def cli() -> None:
     """CRM Epic Events — gestion clients, contrats et événements."""
+    init_sentry()
 
 
 cli.add_command(login_cmd)

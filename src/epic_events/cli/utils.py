@@ -33,7 +33,7 @@ R = TypeVar("R")
 
 
 def handle_errors(func: Callable[P, R]) -> Callable[P, R]:
-    """Affiche les erreurs métier proprement et quitte avec le code 1."""
+    """Affiche les erreurs métier ; journalise les exceptions inattendues."""
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
@@ -41,6 +41,12 @@ def handle_errors(func: Callable[P, R]) -> Callable[P, R]:
             return func(*args, **kwargs)
         except ServiceError as exc:
             console.print(f"[bold red]Erreur :[/bold red] {exc}")
+            raise SystemExit(1) from exc
+        except Exception as exc:
+            from epic_events.logging_sentry import capture_unexpected
+
+            capture_unexpected(exc)
+            console.print(f"[bold red]Erreur inattendue :[/bold red] {exc}")
             raise SystemExit(1) from exc
 
     return wrapper

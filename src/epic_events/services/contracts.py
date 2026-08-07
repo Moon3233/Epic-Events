@@ -102,6 +102,17 @@ def create_contract(
     session.add(contract)
     session.flush()
     session.refresh(contract, attribute_names=["client", "sales_contact"])
+
+    if is_signed:
+        from epic_events.logging_sentry import log_event
+
+        log_event(
+            "Contrat signé",
+            contract_id=contract.id,
+            client_id=contract.client_id,
+            sales_contact_id=contract.sales_contact_id,
+        )
+
     return contract
 
 
@@ -165,7 +176,18 @@ def update_contract(
         raise ContractError("Le reste à payer ne peut pas dépasser le total.")
 
     if is_signed is not None:
+        was_signed = contract.is_signed
         contract.is_signed = is_signed
+        if is_signed and not was_signed:
+            from epic_events.logging_sentry import log_event
+
+            log_event(
+                "Contrat signé",
+                contract_id=contract.id,
+                client_id=contract.client_id,
+                sales_contact_id=contract.sales_contact_id,
+                actor_id=actor.id,
+            )
 
     session.flush()
     return contract
