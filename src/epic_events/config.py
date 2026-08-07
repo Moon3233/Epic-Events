@@ -35,6 +35,15 @@ class DatabaseSettings:
         )
 
 
+@dataclass(frozen=True)
+class JwtSettings:
+    """Paramètres de signature et de durée de vie des jetons JWT."""
+
+    secret: str
+    algorithm: str
+    expire_hours: int
+
+
 def get_database_settings() -> DatabaseSettings:
     """Lit les variables DB_* ; lève une erreur claire si une clé manque."""
     required = ("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD")
@@ -52,4 +61,19 @@ def get_database_settings() -> DatabaseSettings:
         name=os.environ["DB_NAME"],
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"],
+    )
+
+
+def get_jwt_settings() -> JwtSettings:
+    """Lit JWT_SECRET / JWT_ALGORITHM / JWT_EXPIRE_HOURS."""
+    secret = os.getenv("JWT_SECRET")
+    if not secret:
+        raise RuntimeError(
+            "Variable JWT_SECRET manquante. "
+            "Copiez .env.example vers .env et définissez un secret aléatoire."
+        )
+    return JwtSettings(
+        secret=secret,
+        algorithm=os.getenv("JWT_ALGORITHM", "HS256"),
+        expire_hours=int(os.getenv("JWT_EXPIRE_HOURS", "8")),
     )

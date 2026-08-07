@@ -29,7 +29,8 @@ class EmployeeIdentity:
     permissions: frozenset[Permission]
 
 
-def _to_identity(employee: Employee) -> EmployeeIdentity:
+def to_identity(employee: Employee) -> EmployeeIdentity:
+    """Construit une vue d'identification à partir d'un Employee ORM."""
     return EmployeeIdentity(
         id=employee.id,
         employee_number=employee.employee_number,
@@ -91,7 +92,7 @@ def create_employee(
     )
     session.add(employee)
     session.flush()
-    return _to_identity(employee)
+    return to_identity(employee)
 
 
 def get_employee_by_email(session: Session, email: str) -> Employee | None:
@@ -128,4 +129,4 @@ def identify_employee(
         return None
     if not verify_password(employee.password_hash, password):
         return None
-    return _to_identity(employee)
+    return to_identity(employee)
