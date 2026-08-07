@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -13,6 +13,8 @@ from epic_events.config import get_database_settings
 
 _engine: Engine | None = None
 _SessionLocal: sessionmaker[Session] | None = None
+
+DEFAULT_DEPARTMENTS = ("gestion", "commercial", "support")
 
 
 def get_engine() -> Engine:
@@ -22,7 +24,7 @@ def get_engine() -> Engine:
         settings = get_database_settings()
         _engine = create_engine(
             settings.url,
-            pool_pre_ping=True,  # détecte les connexions mortes
+            pool_pre_ping=True,
             echo=False,
         )
         _SessionLocal = sessionmaker(bind=_engine, autoflush=False, autocommit=False)
@@ -48,6 +50,20 @@ def session_scope() -> Generator[Session, None, None]:
         raise
     finally:
         session.close()
+
+
+def init_db() -> None:
+    """Crée les tables manquantes et initialise les départements de référence."""
+    # Import local pour enregistrer les modèles dans Base.metadata
+    from epic_events.models import Base, Department
+
+    Base.metadata.create_all(bind=get_engine())
+
+    with session_scope() as session:
+        existing = set(session.scalars(select(Department.name)).all())
+        for name in DEFAULT_DEPARTMENTS:
+            if name not in existing:
+                session.add(Department(name=name))
 
 
 def check_connection() -> str:
