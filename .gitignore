@@ -26,6 +26,3 @@ htmlcov/
 # Jetons JWT locaux
 *.token
 .auth_token
-
-# Scripts locaux
-scripts/

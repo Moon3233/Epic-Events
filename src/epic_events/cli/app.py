@@ -10,6 +10,7 @@ from epic_events.cli.clients_commands import clients_group
 from epic_events.cli.contracts_commands import contracts_group
 from epic_events.cli.employees_commands import employees_group
 from epic_events.cli.events_commands import events_group
+from epic_events.cli.setup_commands import init_db_cmd, seed_admin_cmd
 from epic_events.logging_sentry import init_sentry
 
 
@@ -23,6 +24,8 @@ def cli() -> None:
 cli.add_command(login_cmd)
 cli.add_command(logout_cmd)
 cli.add_command(whoami_cmd)
+cli.add_command(init_db_cmd)
+cli.add_command(seed_admin_cmd)
 cli.add_command(clients_group)
 cli.add_command(contracts_group)
 cli.add_command(employees_group)
