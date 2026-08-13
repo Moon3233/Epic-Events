@@ -53,7 +53,8 @@ def contracts_create(
             is_signed=signed,
             sales_contact_id=sales_contact_id,
         )
-    display.success(f"Contrat créé #{contract.id}")
+        contract_id = contract.id
+    display.success(f"Contrat créé #{contract_id}")
 
 
 @contracts_group.command("update")
@@ -83,4 +84,5 @@ def contracts_update(
             remaining_amount=Decimal(remaining_amount) if remaining_amount else None,
             is_signed=signed,
         )
-    display.success(f"Contrat #{contract.id} mis à jour.")
+        updated_id = contract.id
+    display.success(f"Contrat #{updated_id} mis à jour.")

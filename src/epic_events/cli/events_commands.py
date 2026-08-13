@@ -57,7 +57,8 @@ def events_create(
             attendees=attendees,
             notes=optional_text(notes),
         )
-    display.success(f"Événement créé #{event.id}")
+        event_id = event.id
+    display.success(f"Événement créé #{event_id}")
 
 
 @events_group.command("update")
@@ -101,4 +102,5 @@ def events_update(
             support_contact_id=support_contact_id,
             clear_support=clear_support,
         )
-    display.success(f"Événement #{event.id} mis à jour.")
+        updated_id = event.id
+    display.success(f"Événement #{updated_id} mis à jour.")

@@ -44,7 +44,8 @@ def clients_create(
             phone=phone,
             company_name=company_name,
         )
-    display.success(f"Client créé #{client.id} — {client.company_name}")
+        msg = f"Client créé #{client.id} — {client.company_name}"
+    display.success(msg)
 
 
 @clients_group.command("update")
@@ -71,4 +72,5 @@ def clients_update(
             phone=optional_text(phone),
             company_name=optional_text(company_name),
         )
-    display.success(f"Client #{client.id} mis à jour.")
+        updated_id = client.id
+    display.success(f"Client #{updated_id} mis à jour.")

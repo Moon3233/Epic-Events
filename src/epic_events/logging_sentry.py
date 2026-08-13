@@ -34,6 +34,7 @@ def capture_unexpected(exc: BaseException) -> None:
     """Envoie une exception inattendue à Sentry (no-op si désactivé)."""
     if sentry_sdk.is_initialized():
         sentry_sdk.capture_exception(exc)
+        sentry_sdk.flush(timeout=2.0)
 
 
 def log_event(message: str, *, level: str = "info", **context: Any) -> None:
@@ -45,3 +46,5 @@ def log_event(message: str, *, level: str = "info", **context: Any) -> None:
         for key, value in context.items():
             scope.set_extra(key, value)
         sentry_sdk.capture_message(message, level=level)
+    # Envoi immédiat : évite le message « Press Ctrl-C to quit » à la sortie CLI
+    sentry_sdk.flush(timeout=2.0)
